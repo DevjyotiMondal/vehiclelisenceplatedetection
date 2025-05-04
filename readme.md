@@ -67,3 +67,84 @@ Use your labeled data and follow the training instructions specific to YOLO to t
 After training, the output model file (e.g., best.pt) will be generated, download it and use in the main.py.
 
 ## Detecting the model 
+Once the model is trained and you’ve downloaded the best.pt weights file, you can use it to run inference on new images or videos.
+
+Here’s how to set up detection using your trained YOLOv8 model in a Python script (main.py):
+
+1. Set Up Your Environment
+Make sure you have the required libraries installed:
+
+
+pip install ultralytics opencv-python
+2. Write the Detection Script (main.py)
+python
+Copy
+Edit
+from ultralytics import YOLO
+import cv2
+
+# Load the trained model
+model = YOLO('best.pt')  # path to your trained model
+
+# Load the image or video
+img = cv2.imread('path/to/your/image.jpg')
+
+# Run detection
+results = model(img)
+
+# Display results
+for r in results:
+    r.show()  # Visualize detection in a window
+    r.save(save_dir='runs/detect/prediction')  # Save predictions to a folder
+You can also use this for real-time webcam detection:
+
+python
+Copy
+Edit
+cap = cv2.VideoCapture(0)  # 0 for default webcam
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    results = model(frame)
+    annotated_frame = results[0].plot()
+
+    cv2.imshow('YOLO Detection', annotated_frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+Post-Processing and Evaluation
+After running inference:
+
+Review the output predictions saved in the runs/detect/prediction/ folder.
+
+You can evaluate model accuracy using metrics like precision, recall, and mAP if not done during training.
+
+For large-scale testing, batch inference and performance benchmarking are recommended.
+
+Optional: Exporting the Model
+If you need to deploy your YOLO model to different platforms:
+
+yolo export model=best.pt format=onnx  # For ONNX export
+yolo export model=best.pt format=torchscript  # For TorchScript
+These formats are useful for integrating the model into mobile or production environments.
+
+#Final Folder Overview
+project/
+├── main.py
+├── best.pt
+├── test_images/
+├── modelImages/
+│   ├── images/
+│   │   ├── training/
+│   │   └── validation/
+│   └── labels/
+│       ├── training/
+│       └── validation/
+└── runs/
+    └── detect/
